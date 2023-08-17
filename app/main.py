@@ -1,41 +1,11 @@
 from fastapi import FastAPI
 from datetime import date
 from pydantic import BaseModel
-import logging
-import sys
+from DTO import Users
+from logger import mylogger
 
 app = FastAPI()
 
-#log
-mylogger = logging.getLogger("mylogger")
-
-formatter = logging.Formatter('[%(levelname)s] %(message)s')
-
-handler = logging.StreamHandler(stream=sys.stdout)
-handler.setFormatter(formatter)
-handler.setLevel(logging.DEBUG)
-
-mylogger.addHandler(handler)
-mylogger.setLevel(logging.DEBUG)
-
-mylogger.debug("This is a debug message.")
-mylogger.info("Some info message.")
-mylogger.warning("A warning.")
-
-#가상의 Users 데이터
-class Users(BaseModel):
-    name: str
-    password: str
-    email: str
-    email_check: bool
-    address: str
-    profil_image: str
-    ninkName: str
-    login_date: str
-    phoneNum: str
-
-# 가상의 데이터베이스를 사용하여 회원 정보를 저장
-# fake_db = []
 
 #회원가입
 @app.post("/signup")
