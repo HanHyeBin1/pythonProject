@@ -1,11 +1,68 @@
-from fastapi import FastAPI
-from datetime import date
+from fastapi import FastAPI, HTTPException
+from datetime import datetime, timedelta
 from pydantic import BaseModel
+from passlib.context import CryptContext
 from DTO import Users
 from logger import mylogger
+from database import get_db, SessionLocal
+import jwt
 
 app = FastAPI()
 
+SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+def decode_access_token(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+#비밀번호 해쉬값
+def get_passwd_hash(password):
+    return pwd_context.hash(password)
+
+#비밀번호 증명
+def verify_passwd(plan_passwd, hashed_passwd):
+    return pwd_context.verify(plan_passwd, hashed_passwd)
+
+#테스트
+fake_users_db = {
+    "johndoe": {
+        "username": "johndoe",
+        "full_name": "John Doe",
+        "email": "johndoe@example.com",
+        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
+        "disabled": False,
+    }
+}
+
+#로그인
+@app.post("/login")
+def login(user: Users):
+    mylogger.debug(user)
+    #사용자의 비밀번호 해시화 하기
+    user.password = get_passwd_hash(user.password)
+    #유저를 DB에 저장 / db 연결해야함
+    # db.session.add(user)
+    # db.session.commit()
+    return {"message": "User login successfully"}
 
 #회원가입
 @app.post("/signup")
@@ -30,12 +87,6 @@ def logout():
 def userdelete():
     mylogger.debug("user delete")
     return {"message": "User delete successfully"}
-
-#로그인
-@app.post("/login")
-def login(user: Users):
-    mylogger.debug(user)
-    return {"message": "User login successfully"}
 
 #장바구니 추가
 @app.post("/carts/{user_no}")
