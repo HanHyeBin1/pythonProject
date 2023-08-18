@@ -2,6 +2,8 @@ from pydantic import BaseModel
 from datetime import date, datetime, time, timedelta
 from typing import Union
 
+#schemas 대신 DTO 파일 작성
+
 #token
 class Token(BaseModel):
     access_token:str
