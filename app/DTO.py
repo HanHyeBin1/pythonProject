@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import date, datetime, time, timedelta
-from typing import Union
+from typing import Union, List
 
 #schemas 대신 DTO 파일 작성
 
