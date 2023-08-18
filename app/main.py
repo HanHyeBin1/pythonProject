@@ -13,6 +13,8 @@ SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+db = SessionLocal()
+
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
     if expires_delta:
@@ -60,8 +62,8 @@ def login(user: Users):
     #사용자의 비밀번호 해시화 하기
     user.password = get_passwd_hash(user.password)
     #유저를 DB에 저장 / db 연결해야함
-    # db.session.add(user)
-    # db.session.commit()
+    db.session.add(user)
+    db.session.commit()
     return {"message": "User login successfully"}
 
 #회원가입
