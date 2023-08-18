@@ -21,13 +21,17 @@ class User(Base):
 
     items = relationship("Item", back_populates="owner")
 
-
 class Item(Base):
     __tablename__ = "items"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    description = Column(String, index=True)
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    item_name = Column(String, index=True)
+    item_info = Column(String, index=True)
+    price = Column(int)
+    remain_item = Column(int)
+    author_name = Column(String)
+    view_count = Column(int)
+    register_date = Column(date)
+    brand = Column(String)
 
     owner = relationship("User", back_populates="items")
